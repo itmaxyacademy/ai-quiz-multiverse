@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AvatarConfig,
   GameMode,
@@ -35,6 +35,43 @@ export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"error" | "success" | "info">("error");
+
+  // PWA Install State
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if running in standalone mode (installed PWA)
+    const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    setIsStandalone(isStandaloneMode);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    window.addEventListener('appinstalled', () => {
+      setDeferredInstallPrompt(null);
+      setIsStandalone(true);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsStandalone(true);
+      showToast("AI Quiz Multiverse app installed successfully!", "success");
+    }
+    setDeferredInstallPrompt(null);
+  };
 
   const showToast = (
     msg: string,
@@ -201,6 +238,9 @@ export default function App() {
           setQuestionCount={setQuestionCount}
           isLoading={isLoading}
           showToast={showToast}
+          deferredInstallPrompt={deferredInstallPrompt}
+          isStandalone={isStandalone}
+          onInstallApp={handleInstallApp}
         />
       )}
 

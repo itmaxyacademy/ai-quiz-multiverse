@@ -8,7 +8,14 @@ import {
   Play,
   Bot,
   HelpCircle,
-  BookOpen
+  BookOpen,
+  Settings,
+  Download,
+  Smartphone,
+  CheckCircle,
+  X,
+  Info,
+  ShieldCheck
 } from "lucide-react";
 import { AvatarConfig, GameMode } from "../types";
 import { parseDocumentFile } from "../utils/documentParser";
@@ -24,6 +31,9 @@ interface SetupScreenProps {
   setQuestionCount: (count: number) => void;
   isLoading: boolean;
   showToast: (msg: string, type?: "error" | "success" | "info") => void;
+  deferredInstallPrompt?: any;
+  isStandalone?: boolean;
+  onInstallApp?: () => void;
 }
 
 export const SetupScreen: React.FC<SetupScreenProps> = ({
@@ -37,9 +47,13 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   setQuestionCount,
   isLoading,
   showToast,
+  deferredInstallPrompt,
+  isStandalone = false,
+  onInstallApp,
 }) => {
   const [sourceText, setSourceText] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,11 +87,33 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto min-h-screen p-4 md:p-6 flex flex-col justify-start bg-slate-950 text-white">
-      {/* Header / Title Banner */}
-      <div className="text-center my-4">
+    <div className="w-full max-w-xl mx-auto min-h-screen p-4 md:p-6 flex flex-col justify-start bg-slate-950 text-white relative">
+      
+      {/* Top Header Bar with Settings & PWA Button */}
+      <div className="flex items-center justify-between py-2 border-b border-slate-800/80 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <Bot className="w-4 h-4 animate-pulse" />
+          </div>
+          <span className="text-xs font-bold text-slate-300">AI Quiz Multiverse</span>
+        </div>
+
+        <button
+          onClick={() => setShowSettingsModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+        >
+          <Settings className="w-3.5 h-3.5 text-blue-400" />
+          <span>Pengaturan & PWA</span>
+          {deferredInstallPrompt && (
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+          )}
+        </button>
+      </div>
+
+      {/* Title Banner */}
+      <div className="text-center my-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold mb-2">
-          <Bot className="w-4 h-4 text-blue-400 animate-pulse" />
+          <Sparkles className="w-3.5 h-3.5 text-blue-400" />
           <span>Powered by Google Gemini AI</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
@@ -89,7 +125,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
       </div>
 
       {/* Main Form Box */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 md:p-5 shadow-2xl space-y-4 backdrop-blur-md">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 md:p-5 shadow-2xl space-y-4 backdrop-blur-md mt-2">
         
         {/* Upload & Notes Input */}
         <div>
@@ -272,7 +308,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
             <button
               type="button"
               onClick={handleGenerateClick}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-black text-sm md:text-base shadow-lg shadow-blue-500/25 transition-all transform active:scale-98 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-black text-sm md:text-base shadow-lg shadow-blue-500/25 transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-5 h-5 text-yellow-300 animate-spin" style={{ animationDuration: "3s" }} />
               <span>Generate AI Quiz with Gemini</span>
@@ -281,7 +317,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
             <button
               type="button"
               onClick={() => onUsePreset("general")}
-              className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Play className="w-3.5 h-3.5 text-emerald-400" />
               <span>Play Default Trivia Quiz Immediately</span>
@@ -289,6 +325,131 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
           </div>
         )}
       </div>
+
+      {/* Settings & PWA Installation Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                  <Settings className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">Pengaturan & PWA</h3>
+                  <p className="text-xs text-slate-400">Kelola preferensi & install aplikasi ke perangkat</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* PWA Section */}
+            <div className="space-y-4">
+              
+              {/* Card PWA Install */}
+              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                      <Smartphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-white">Aplikasi PWA (Progressive Web App)</h4>
+                      <p className="text-[11px] text-slate-400">Mainkan tanpa browser frame & dapat diakses secara offline.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs">
+                  <span className="text-slate-400 font-semibold">Status Aplikasi:</span>
+                  {isStandalone ? (
+                    <span className="inline-flex items-center gap-1 font-extrabold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[11px]">
+                      <CheckCircle className="w-3.5 h-3.5" /> Terpasang (Standalone)
+                    </span>
+                  ) : deferredInstallPrompt ? (
+                    <span className="inline-flex items-center gap-1 font-extrabold text-blue-400 bg-blue-950/60 border border-blue-500/30 px-2.5 py-0.5 rounded-full text-[11px] animate-pulse">
+                      <Sparkles className="w-3.5 h-3.5 text-yellow-300" /> Siap Di-install
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 font-semibold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full text-[11px]">
+                      Browser Web
+                    </span>
+                  )}
+                </div>
+
+                {/* Install Action Button */}
+                {isStandalone ? (
+                  <div className="flex items-center gap-2 p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-semibold">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>AI Quiz Multiverse sudah terpasang di perangkat Anda. Anda dapat membukanya langsung dari Home Screen atau Menu Aplikasi.</span>
+                  </div>
+                ) : deferredInstallPrompt ? (
+                  <button
+                    onClick={() => {
+                      if (onInstallApp) onInstallApp();
+                    }}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all transform active:scale-98 cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Install Aplikasi AI Quiz Multiverse</span>
+                  </button>
+                ) : (
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs space-y-2 text-slate-300">
+                    <div className="font-bold text-blue-400 flex items-center gap-1.5">
+                      <Info className="w-4 h-4" /> Cara Menginstall Secara Manual:
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400">
+                      <li><strong>Desktop Chrome / Edge:</strong> Klik menu titik tiga <span className="font-bold text-white">⋮</span> di kanan atas $\rightarrow$ <strong>"Install AI Quiz Multiverse"</strong></li>
+                      <li><strong>iPhone / iPad (Safari):</strong> Klik tombol Share <span className="font-bold text-white">⎘</span> $\rightarrow$ <strong>"Add to Home Screen"</strong></li>
+                      <li><strong>Android Chrome:</strong> Klik menu titik tiga <span className="font-bold text-white">⋮</span> $\rightarrow$ <strong>"Install app"</strong></li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* System & Engine Card */}
+              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-2 text-xs">
+                <div className="font-bold text-slate-300 uppercase tracking-wider text-[10px]">Sistem & AI Engine</div>
+                <div className="flex items-center justify-between text-slate-400 py-1 border-b border-slate-900">
+                  <span>AI Model:</span>
+                  <span className="font-bold text-blue-400">Google Gemini 1.5 Flash</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-400 py-1 border-b border-slate-900">
+                  <span>Service Worker:</span>
+                  <span className="font-bold text-emerald-400 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Aktif (Offline Ready)
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-slate-400 py-1">
+                  <span>Versi PWA:</span>
+                  <span className="font-mono text-slate-300 font-bold">v1.0.0</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer Close */}
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
