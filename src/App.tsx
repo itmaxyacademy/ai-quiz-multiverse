@@ -1,3 +1,4 @@
+import { PWAUpdateToast } from "./components/PWAUpdateToast";
 import React, { useState, useEffect } from "react";
 import {
   AvatarConfig,
@@ -287,6 +288,9 @@ export default function App() {
           onNewQuiz={handleResetToSetup}
         />
       )}
+    
+      {/* PWA Auto-Update Notification Toast */}
+      <PWAUpdateToast />
     </div>
   );
 }

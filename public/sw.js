@@ -1,21 +1,34 @@
-const CACHE_NAME = 'ai-quiz-multiverse-v1';
+const CACHE_NAME = 'ai-quiz-multiverse-v1.0.0';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.png',
-  '/apple-touch-icon.png',
-  '/icons/pwa-192.png',
-  '/icons/pwa-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './favicon.png',
+  './apple-touch-icon.png',
+  './icons/pwa-192.png',
+  './icons/pwa-512.png'
 ];
+
+// Handle SKIP_WAITING from client update toast
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
 // Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Caching static assets for AI Quiz Multiverse');
-      return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting())
+      return Promise.allSettled(
+        STATIC_ASSETS.map((asset) =>
+          cache.add(asset).catch((err) => {
+            console.warn('[SW] Optional asset cache failed:', asset, err);
+          })
+        )
+      );
+    })
   );
 });
 
@@ -25,7 +38,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
+          if (cache.startsWith('ai-quiz') && cache !== CACHE_NAME) {
             console.log('[SW] Clearing old cache:', cache);
             return caches.delete(cache);
           }
@@ -39,15 +52,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // Pass API requests directly to network with offline fallback
-  if (requestUrl.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(JSON.stringify({ error: 'Mode offline aktif. Silakan gunakan preset quiz!' }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
-    );
+  // Pass non-GET, API requests, and version.json directly to network
+  if (
+    event.request.method !== 'GET' ||
+    requestUrl.pathname.startsWith('/api/') ||
+    requestUrl.pathname.endsWith('version.json')
+  ) {
     return;
   }
 
@@ -55,7 +65,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match('/index.html');
+        return caches.match('./index.html') || caches.match('./');
       })
     );
     return;

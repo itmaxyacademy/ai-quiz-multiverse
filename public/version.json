@@ -1,0 +1,6 @@
+{
+  "appName": "AI Quiz Multiverse",
+  "version": "1.0.0",
+  "buildTime": "2026-09-16T11:00:00.000Z",
+  "releaseNotes": "Versi awal dengan dukungan PWA, zero-click auto update, dan deteksi online."
+}

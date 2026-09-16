@@ -1,6 +1,7 @@
 {
   "name": "AI Quiz Multiverse - Arcade Study Games",
   "short_name": "QuizMultiverse",
+  "version": "1.0.0",
   "description": "Ubah Catatan Belajar Anda Menjadi Arcade Game Interaktif berbasis AI Gemini!",
   "start_url": "/",
   "display": "standalone",
