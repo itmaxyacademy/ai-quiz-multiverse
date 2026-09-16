@@ -1,14 +1,21 @@
 {
-  "name": "AI Quiz Multiverse - Arcade Study Games",
-  "short_name": "QuizMultiverse",
-  "version": "1.0.0",
-  "description": "Ubah Catatan Belajar Anda Menjadi Arcade Game Interaktif berbasis AI Gemini!",
+  "name": "AI Quiz Multiverse",
+  "short_name": "AI Quiz",
+  "version": "1.0.1",
+  "description": "AI Quiz Multiverse - Turn your study notes into playable arcade mini-games.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#020617",
-  "theme_color": "#3b82f6",
+  "theme_color": "#020617",
   "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "./icons/pwa-192.png",
       "sizes": "192x192",
@@ -21,6 +28,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "scope": "./"
+  ]
 }
