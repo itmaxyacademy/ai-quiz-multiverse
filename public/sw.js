@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ai-quiz-multiverse-v1.0.0';
+const CACHE_NAME = 'ai-quiz-multiverse-v1.0.1';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ self.addEventListener('message', (event) => {
 
 // Install Event
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Caching static assets for AI Quiz Multiverse');

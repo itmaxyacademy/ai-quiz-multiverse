@@ -12,7 +12,8 @@ if ('serviceWorker' in navigator) {
         (window as any).pwaRegistration = reg;
 
         if (reg.waiting) {
-          console.log('[PWA] Update already waiting on load');
+          console.log('[PWA] Update already waiting on load, triggering SKIP_WAITING');
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
           window.dispatchEvent(new CustomEvent('pwa-update-available', { detail: { registration: reg } }));
         }
 
@@ -21,7 +22,8 @@ if ('serviceWorker' in navigator) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[PWA] New version installed and waiting activation');
+                console.log('[PWA] New version installed, triggering SKIP_WAITING');
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
                 window.dispatchEvent(new CustomEvent('pwa-update-available', { detail: { registration: reg } }));
               }
             });
