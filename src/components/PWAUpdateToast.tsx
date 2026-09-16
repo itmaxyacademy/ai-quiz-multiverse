@@ -134,6 +134,7 @@ export function PWAUpdateToast({ onDismiss }: PWAUpdateToastProps) {
       checkVersionFromServer();
     };
     window.addEventListener("online", handleOnline);
+    window.addEventListener("pwa-check-version", checkVersionFromServer);
 
     // 4. Tab visibility change
     const handleVisibilityChange = () => {
@@ -153,6 +154,7 @@ export function PWAUpdateToast({ onDismiss }: PWAUpdateToastProps) {
     return () => {
       window.removeEventListener("pwa-update-available", handleUpdateAvailable);
       window.removeEventListener("online", handleOnline);
+      window.removeEventListener("pwa-check-version", checkVersionFromServer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearInterval(intervalId);
       if (autoUpdateTimerRef.current) {

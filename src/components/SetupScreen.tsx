@@ -1,3 +1,4 @@
+import { APP_VERSION } from '../version';
 import React, { useState } from "react";
 import {
   Upload,
@@ -96,6 +97,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
             <Bot className="w-4 h-4 animate-pulse" />
           </div>
           <span className="text-xs font-bold text-slate-300">AI Quiz Multiverse</span>
+          <button onClick={() => { if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(r => r?.update()); window.dispatchEvent(new CustomEvent('pwa-check-version')); }} className="text-[10px] font-mono font-bold text-purple-400 bg-purple-950/70 hover:bg-purple-900/80 border border-purple-500/30 rounded px-1.5 py-0.5 transition-colors cursor-pointer" title={`AI Quiz Multiverse v${APP_VERSION} - Klik untuk cek update`}>v{APP_VERSION}</button>
         </div>
 
         <button
