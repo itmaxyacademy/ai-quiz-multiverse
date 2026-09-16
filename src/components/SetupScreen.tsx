@@ -118,9 +118,12 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-blue-400" />
           <span>Powered by Google Gemini AI</span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
-          AI Quiz Multiverse
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
+            AI Quiz Multiverse
+          </h1>
+          <span className="px-2.5 py-0.5 text-xs font-mono font-bold text-purple-300 bg-purple-950/80 border border-purple-500/40 rounded-full shadow-sm" title={`AI Quiz Multiverse v${APP_VERSION}`}>v{APP_VERSION}</span>
+        </div>
         <p className="text-xs md:text-sm text-slate-400 mt-1 max-w-md mx-auto">
           Turn your study notes & documents into playable, action-packed arcade mini-games!
         </p>
